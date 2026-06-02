@@ -1,0 +1,242 @@
+# Devotional App Project Overview
+
+## Project Summary
+
+A minimalist devotional web app inspired by the reading-plan experience of [YouVersion Bible App](https://www.youversion.com/the-bible-app/?utm_source=chatgpt.com), built with a lightweight architecture similar to the existing RarityRadar project.
+
+The app focuses on:
+
+* clean reading experience
+* daily devotional plans
+* scripture reading integration
+* user progress tracking
+* simple creator-controlled content management
+
+The initial audience is small-scale (personal use + friends), so the architecture should prioritize maintainability, simplicity, and fast iteration over enterprise-scale complexity.
+
+---
+
+# Core Features
+
+## User Accounts
+
+Users can:
+
+* register/login
+* track devotional progress
+* save active plans
+* choose preferred Bible translation
+* resume reading where they left off
+
+Authentication:
+
+* JWT-based auth using FastAPI backend
+* PostgreSQL for persistent storage
+
+---
+
+# Homepage Layout
+
+## Top Section — Active Plans
+
+Displays:
+
+* currently active devotional plans
+* progress bars
+* current day
+* quick resume button
+
+## Main Library Section
+
+Searchable/browsable list of all available plans:
+
+* image thumbnail
+* title
+* short description
+* duration/day count
+
+---
+
+# Devotional Plan Structure
+
+Plans are creator-authored and added only through backend seed files or admin workflows.
+
+No public submission system is needed.
+
+Each plan contains:
+
+* title
+* slug
+* description
+* image
+* ordered days
+
+Each day contains:
+
+* flexible ordered content steps
+
+Examples of steps:
+
+* devotional reading
+* scripture reading
+* reflection prompt
+* prayer
+* closer
+* quote
+* audio/video (future)
+
+The step system should remain generic and extensible.
+
+---
+
+# Recommended Data Model
+
+## Database Tables
+
+### users
+
+Stores user accounts.
+
+### plans
+
+Stores devotional plan metadata.
+
+### plan_days
+
+Stores ordered days within a plan.
+
+### plan_steps
+
+Stores flexible ordered steps within each day.
+
+### user_plan_progress
+
+Tracks which plans a user has started/completed.
+
+### user_step_progress
+
+Tracks completed steps.
+
+---
+
+# Content Authoring Format
+
+Plans should be authored in JSON or YAML files and imported into the database using backend seed scripts.
+
+Example structure:
+
+```json
+{
+  "title": "Abide in Christ",
+  "slug": "abide-in-christ",
+  "description": "A devotional on abiding in Jesus.",
+  "days": [
+    {
+      "day_number": 1,
+      "title": "The Vine",
+      "steps": [
+        {
+          "type": "devotional",
+          "content_markdown": "Jesus invites us to remain in Him..."
+        },
+        {
+          "type": "scripture",
+          "reference": "John 15:1-11"
+        },
+        {
+          "type": "closer",
+          "content_markdown": "Spend a few minutes in prayer."
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+# Scripture Handling Strategy
+
+Scripture text should NOT be stored locally.
+
+Instead:
+
+* store only scripture references
+* render scripture through the YouVersion Platform APIs/components
+* allow user-selected Bible versions
+
+Example:
+
+* John 15:1-11
+* Psalm 23
+* Romans 8:28-39
+
+This avoids:
+
+* licensing complexity
+* scraping instability
+* large scripture databases
+
+Preferred versions:
+
+* NIV
+* ESV
+* NLT
+* CSB
+* NKJV
+* KJV
+
+---
+
+# Tech Stack
+
+## Frontend
+
+* React
+* TypeScript
+* Vite
+
+## Backend
+
+* FastAPI
+* SQLAlchemy or SQLModel
+* Alembic migrations
+* JWT auth
+
+## Database
+
+* PostgreSQL
+
+## Deployment
+
+* Railway
+
+---
+
+# Architecture Philosophy
+
+Keep the system lightweight and modular.
+
+The app should:
+
+* feel calm and minimal
+* prioritize reading experience
+* avoid feature bloat
+* support future expansion through flexible step types
+
+Key philosophy:
+
+* devotional content is owned by the app
+* scripture rendering is delegated to YouVersion infrastructure
+
+---
+
+# MVP Goals
+
+## Phase 1
+
+* user auth
+* devotional plans
+* daily reading UI
+* progress tracking
+* searchable plan library
