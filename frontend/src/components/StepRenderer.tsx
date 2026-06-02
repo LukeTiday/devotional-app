@@ -4,12 +4,25 @@ import type { PlanStep } from "../types";
 
 type Props = {
   step: PlanStep;
+  isComplete: boolean;
+  onToggleComplete: () => void;
 };
 
-function StepRenderer({ step }: Props) {
+function StepRenderer({ step, isComplete, onToggleComplete }: Props) {
   return (
-    <article>
-      <small>{step.step_type}</small>
+    <article className={isComplete ? "step step-complete" : "step"}>
+      <div className="step-header">
+        <small>{step.step_type}</small>
+
+        <button
+          type="button"
+          className={isComplete ? "complete-button complete-button-active" : "complete-button"}
+          onClick={onToggleComplete}
+        >
+          <span className="checkmark">{isComplete ? "✓" : ""}</span>
+          <span>{isComplete ? " Completed" : "Mark complete"}</span>
+        </button>
+      </div>
 
       {step.content_markdown && (
         <ReactMarkdown>{step.content_markdown}</ReactMarkdown>

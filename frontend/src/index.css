@@ -58,3 +58,155 @@ small {
 p {
   line-height: 1.6;
 }
+
+.step {
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.complete-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #5b4b3d;
+  border-radius: 999px;
+  background: #2d251f;
+  color: #f4efe7;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.complete-button:hover {
+  background: #3a3129;
+}
+
+.complete-button-active {
+  border-color: #8f7654;
+  background: #3a3129;
+}
+
+.checkmark {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #8f7654;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.complete-button-active .checkmark {
+  background: #8f7654;
+  color: #15120f;
+}
+
+.step-complete {
+  border-color: #8f7654;
+  opacity: 0.72;
+}
+
+.day-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.day-header h2 {
+  margin-bottom: 0;
+}
+
+.day-header p {
+  margin: 0;
+  color: #c6a875;
+  font-size: 0.9rem;
+}
+
+.day-selector {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 16px 0 20px;
+  margin: 24px 0 8px;
+  scrollbar-width: thin;
+}
+
+.day-selector-button {
+  position: relative;
+  min-width: 72px;
+  border: 1px solid #5b4b3d;
+  border-radius: 14px;
+  background: #211c17;
+  color: #f4efe7;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+.day-selector-button span {
+  display: block;
+  color: #c6a875;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.day-selector-button strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.15rem;
+}
+
+.day-selector-button-active {
+  border-color: #c6a875;
+  background: #3a3129;
+}
+
+.day-selector-check {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: grid !important;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #8f7654;
+  color: #15120f !important;
+  font-size: 0.75rem !important;
+  line-height: 1;
+}
+
+.day-nav-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.day-nav-button {
+  border: 1px solid #5b4b3d;
+  border-radius: 999px;
+  background: #2d251f;
+  color: #f4efe7;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.day-nav-button:hover:not(:disabled) {
+  background: #3a3129;
+}
+
+.day-nav-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
