@@ -14,7 +14,7 @@ function DaySection({ day }: Props) {
       </h2>
 
       {day.steps.map((step) => (
-        <StepRenderer key={step.id} step={step} />
+        <StepRenderer key={step.step_key} step={step} />
       ))}
     </section>
   );

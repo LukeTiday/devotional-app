@@ -41,6 +41,7 @@ def get_plan(slug: str, db: Session = Depends(get_db)):
                 "steps": [
                     {
                         "id": step.id,
+                        "step_key": f"day-{day.day_number}-step-{step.step_order}",
                         "step_order": step.step_order,
                         "step_type": step.step_type,
                         "content_markdown": step.content_markdown,

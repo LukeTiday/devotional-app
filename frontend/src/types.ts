@@ -8,6 +8,7 @@ export type PlanSummary = {
 
 export type PlanStep = {
   id: number;
+  step_key: string;
   step_order: number;
   step_type: string;
   content_markdown: string | null;

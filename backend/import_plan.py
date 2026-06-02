@@ -86,19 +86,27 @@ def import_plan(filepath: str):
     )
 
     if existing_plan:
-        db.delete(existing_plan)
+        plan = existing_plan
+        plan.title = metadata["title"]
+        plan.description = metadata["description"]
+        plan.image_url = metadata.get("image_url")
+
+        for day in list(plan.days):
+            db.delete(day)
+
         db.commit()
+        db.refresh(plan)
+    else:
+        plan = Plan(
+            title=metadata["title"],
+            slug=metadata["slug"],
+            description=metadata["description"],
+            image_url=metadata.get("image_url"),
+        )
 
-    plan = Plan(
-        title=metadata["title"],
-        slug=metadata["slug"],
-        description=metadata["description"],
-        image_url=metadata.get("image_url"),
-    )
-
-    db.add(plan)
-    db.commit()
-    db.refresh(plan)
+        db.add(plan)
+        db.commit()
+        db.refresh(plan)
 
     days = parse_days(content)
 
