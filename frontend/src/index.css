@@ -210,3 +210,17 @@ p {
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+.clear-progress-button {
+  margin-top: 8px;
+  border: 1px solid #5b4b3d;
+  border-radius: 999px;
+  background: transparent;
+  color: #c6a875;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.clear-progress-button:hover {
+  background: #2d251f;
+}

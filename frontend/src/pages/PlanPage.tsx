@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import StepRenderer from "../components/StepRenderer";
 import DaySection from "../components/DaySection";
 import { useParams } from "react-router-dom";
 import DaySelector from "../components/DaySelector";
@@ -11,14 +10,44 @@ import type { Plan } from "../types";
 function PlanPage() {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const [hasLoadedCompletedSteps, setHasLoadedCompletedSteps] = useState(false);
   const [selectedDayNumber, setSelectedDayNumber] = useState<number | null>(null);
+
   const { slug } = useParams();
 
   useEffect(() => {
     fetchPlanBySlug(slug)
         .then((data) => setPlan(data))
         .catch((error) => console.error(error));
-  }, []);
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug) {
+        return;
+    }
+
+    const savedSteps = localStorage.getItem(`completedSteps:${slug}`);
+
+    if (!savedSteps) {
+        setCompletedSteps([]);
+        setHasLoadedCompletedSteps(true);
+        return;
+    }
+
+    setCompletedSteps(JSON.parse(savedSteps));
+    setHasLoadedCompletedSteps(true);
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug || !hasLoadedCompletedSteps) {
+        return;
+    }
+
+    localStorage.setItem(
+        `completedSteps:${slug}`,
+        JSON.stringify(completedSteps)
+    );
+  }, [slug, completedSteps, hasLoadedCompletedSteps]);
 
   useEffect(() => {
     if (!plan || selectedDayNumber !== null) {
@@ -54,6 +83,17 @@ function PlanPage() {
         completedSteps={completedSteps}
         onSelectDay={setSelectedDayNumber}
       />
+      <button
+        type="button"
+        className="clear-progress-button"
+        onClick={() => {
+            setCompletedSteps([]);
+            setSelectedDayNumber(null);
+            localStorage.removeItem(`completedSteps:${slug}`);
+        }}
+      >
+        Clear local progress
+      </button>
 
       {plan.days
         .filter((day) => day.day_number === selectedDayNumber)
