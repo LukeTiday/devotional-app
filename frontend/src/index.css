@@ -493,3 +493,35 @@ p {
 .scripture-content .wj {
   color: inherit;
 }
+
+.scripture-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.scripture-toolbar strong {
+  color: #c6a875;
+}
+
+.scripture-toolbar select {
+  border: 1px solid #5b4b3d;
+  border-radius: 999px;
+  background: #15120f;
+  color: #f4efe7;
+  padding: 7px 10px;
+  font: inherit;
+}
+
+.scripture-error {
+  color: #ffb4a8;
+}
+
+.scripture-external-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: #c6a875;
+  font-size: 0.9rem;
+}

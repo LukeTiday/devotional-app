@@ -12,9 +12,13 @@ export type ScriptureReference = {
   content: string;
 };
 
-export async function fetchScriptureReference(reference: string) {
+export async function fetchScriptureReference(
+  reference: string,
+  bibleId: number
+) {
   const params = new URLSearchParams({
     reference,
+    bible_id: String(bibleId),
   });
 
   const response = await fetch(
