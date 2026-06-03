@@ -409,3 +409,13 @@ p {
   color: #ffb4a8;
   margin-top: 0;
 }
+
+.signed-out-warning {
+  margin-top: 16px;
+  border: 1px solid #5b4b3d;
+  border-radius: 16px;
+  background: #211c17;
+  color: #c6a875;
+  padding: 14px 16px;
+  line-height: 1.5;
+}

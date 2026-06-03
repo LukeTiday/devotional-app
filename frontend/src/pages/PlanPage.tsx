@@ -105,6 +105,12 @@ function PlanPage({ token, user }: Props) {
       <h1>{plan.title}</h1>
       <p>{plan.description}</p>
 
+      {!user && (
+        <div className="signed-out-warning">
+            Progress will not be tracked while you are signed out.
+        </div>
+      )}
+
       {isPlanComplete && (
         <div className="plan-complete-banner">
             Plan complete ✓
