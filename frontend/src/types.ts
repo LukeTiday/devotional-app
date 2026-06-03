@@ -25,3 +25,9 @@ export type PlanDay = {
 export type Plan = PlanSummary & {
   days: PlanDay[];
 };
+
+export type ActivePlanSummary = PlanSummary & {
+  completed_steps: number;
+  total_steps: number;
+  progress_percent: number;
+};

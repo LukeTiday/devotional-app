@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import PlanCard from "../components/PlanCard";
 
 import { fetchPlans } from "../api/plans";
-import type { PlanSummary } from "../types";
+import type { ActivePlanSummary, PlanSummary } from "../types";
 import { fetchActivePlans } from "../api/progress";
+
 
 function HomePage() {
   const [plans, setPlans] = useState<PlanSummary[]>([]);
-  const [activePlans, setActivePlans] = useState<PlanSummary[]>([]);
+  const [activePlans, setActivePlans] = useState<ActivePlanSummary[]>([]);
 
   useEffect(() => {
     fetchPlans()

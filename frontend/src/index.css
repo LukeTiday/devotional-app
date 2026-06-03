@@ -285,3 +285,30 @@ p {
   padding: 14px 16px;
   font-weight: 700;
 }
+
+.plan-progress {
+  margin: 16px 0 14px;
+}
+
+.plan-progress-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #c6a875;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.plan-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #15120f;
+  border: 1px solid #3a3129;
+}
+
+.plan-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #8f7654;
+}

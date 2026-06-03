@@ -95,7 +95,44 @@ def get_active_plans(user_key: str, db: Session = Depends(get_db)):
 
     plans = db.query(Plan).filter(Plan.slug.in_(slugs)).all()
 
-    return plans
+    active_plans = []
+
+    for plan in plans:
+        total_steps = sum(len(day.steps) for day in plan.days)
+
+        completed_steps = (
+            db.query(UserStepProgress.step_key)
+            .filter(
+                UserStepProgress.user_key == user_key,
+                UserStepProgress.plan_slug == plan.slug,
+                UserStepProgress.is_complete == True,
+            )
+            .distinct()
+            .all()
+        )
+
+        completed_count = len(completed_steps)
+
+        progress_percent = (
+            round((completed_count / total_steps) * 100)
+            if total_steps > 0
+            else 0
+        )
+
+        active_plans.append(
+            {
+                "id": plan.id,
+                "title": plan.title,
+                "slug": plan.slug,
+                "description": plan.description,
+                "image_url": plan.image_url,
+                "completed_steps": completed_count,
+                "total_steps": total_steps,
+                "progress_percent": progress_percent,
+            }
+        )
+
+    return active_plans
 
 @router.post("/start")
 def start_plan(
