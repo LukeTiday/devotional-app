@@ -26,6 +26,57 @@ def get_db():
     finally:
         db.close()
 
+def update_plan_completion_status(
+    user_key: str,
+    plan_slug: str,
+    db: Session,
+):
+    plan = db.query(Plan).filter(Plan.slug == plan_slug).first()
+
+    if not plan:
+        return
+
+    total_steps = sum(len(day.steps) for day in plan.days)
+
+    completed_step_keys = (
+        db.query(UserStepProgress.step_key)
+        .filter(
+            UserStepProgress.user_key == user_key,
+            UserStepProgress.plan_slug == plan_slug,
+            UserStepProgress.is_complete == True,
+        )
+        .distinct()
+        .all()
+    )
+
+    completed_steps = len(completed_step_keys)
+
+    plan_progress = (
+        db.query(UserPlanProgress)
+        .filter(
+            UserPlanProgress.user_key == user_key,
+            UserPlanProgress.plan_slug == plan_slug,
+        )
+        .first()
+    )
+
+    if not plan_progress:
+        plan_progress = UserPlanProgress(
+            user_key=user_key,
+            plan_slug=plan_slug,
+            is_active=True,
+            is_complete=False,
+        )
+        db.add(plan_progress)
+
+    if total_steps > 0 and completed_steps >= total_steps:
+        plan_progress.is_complete = True
+        plan_progress.is_active = False
+    else:
+        plan_progress.is_complete = False
+
+    db.commit()
+
 @router.get("/active/{user_key}")
 def get_active_plans(user_key: str, db: Session = Depends(get_db)):
     active_plan_slugs = (
@@ -131,18 +182,23 @@ def update_step_progress(
     update: StepProgressUpdate,
     db: Session = Depends(get_db),
 ):
-    progress = (
+    matching_progress_rows = (
         db.query(UserStepProgress)
         .filter(
             UserStepProgress.user_key == update.user_key,
             UserStepProgress.plan_slug == update.plan_slug,
             UserStepProgress.step_key == update.step_key,
         )
-        .first()
+        .all()
     )
 
-    if progress:
-        progress.is_complete = update.is_complete
+    if matching_progress_rows:
+        primary_progress = matching_progress_rows[0]
+        primary_progress.is_complete = update.is_complete
+
+        # Remove duplicate rows for the same user / plan / step.
+        for duplicate_progress in matching_progress_rows[1:]:
+            db.delete(duplicate_progress)
     else:
         progress = UserStepProgress(
             user_key=update.user_key,
@@ -154,6 +210,12 @@ def update_step_progress(
 
     db.commit()
 
+    update_plan_completion_status(
+        user_key=update.user_key,
+        plan_slug=update.plan_slug,
+        db=db,
+    )
+
     return {"status": "ok"}
 
 @router.delete("/{user_key}/{plan_slug}")
@@ -162,6 +224,18 @@ def clear_progress(user_key: str, plan_slug: str, db: Session = Depends(get_db))
         UserStepProgress.user_key == user_key,
         UserStepProgress.plan_slug == plan_slug,
     ).delete()
+
+    plan_progress = (
+        db.query(UserPlanProgress)
+        .filter(
+            UserPlanProgress.user_key == user_key,
+            UserPlanProgress.plan_slug == plan_slug,
+        )
+        .first()
+    )
+
+    if plan_progress:
+        plan_progress.is_complete = False
 
     db.commit()
 

@@ -21,6 +21,7 @@ function PlanPage() {
   const [hasLoadedCompletedSteps, setHasLoadedCompletedSteps] = useState(false);
   const [selectedDayNumber, setSelectedDayNumber] = useState<number | null>(null);
   const [hasStartedPlan, setHasStartedPlan] = useState(false);
+  const [isPlanComplete, setIsPlanComplete] = useState(false);
   const { slug } = useParams();
 
   useEffect(() => {
@@ -34,6 +35,7 @@ function PlanPage() {
         .then((data) => {
         setCompletedSteps(data.completed_steps);
         setHasStartedPlan(data.is_active);
+        setIsPlanComplete(data.is_complete);
         setHasLoadedCompletedSteps(true);
         })
         .catch((error) => {
@@ -59,15 +61,23 @@ function PlanPage() {
         const isCurrentlyComplete = current.includes(stepKey);
         const nextIsComplete = !isCurrentlyComplete;
 
+        const nextCompletedSteps = isCurrentlyComplete
+        ? current.filter((key) => key !== stepKey)
+        : [...current, stepKey];
+
         updateStepProgress({
         planSlug: slug,
         stepKey,
         isComplete: nextIsComplete,
-        }).catch((error) => console.error(error));
+        })
+        .then(() => fetchProgress(slug))
+        .then((data) => {
+            setHasStartedPlan(data.is_active);
+            setIsPlanComplete(data.is_complete);
+        })
+        .catch((error) => console.error(error));
 
-        return isCurrentlyComplete
-        ? current.filter((key) => key !== stepKey)
-        : [...current, stepKey];
+        return nextCompletedSteps;
     });
   }
 
@@ -79,6 +89,13 @@ function PlanPage() {
     <main>
       <h1>{plan.title}</h1>
       <p>{plan.description}</p>
+
+      {isPlanComplete && (
+        <div className="plan-complete-banner">
+            Plan complete ✓
+        </div>
+      )}
+
       <button
         type="button"
         className={
@@ -102,6 +119,7 @@ function PlanPage() {
         >
         {hasStartedPlan ? "Active ✓" : "Set active"}
       </button>
+
       <DaySelector
         days={plan.days}
         selectedDayNumber={selectedDayNumber}
@@ -113,11 +131,12 @@ function PlanPage() {
         className="clear-progress-button"
         onClick={() => {
             clearProgress(slug)
-            .then(() => {
-                setCompletedSteps([]);
-                setSelectedDayNumber(null);
-            })
-            .catch((error) => console.error(error));
+                .then(() => {
+                    setCompletedSteps([]);
+                    setSelectedDayNumber(null);
+                    setIsPlanComplete(false);
+                })
+                .catch((error) => console.error(error));
         }}
         >
         Clear progress

@@ -275,3 +275,13 @@ p {
 .start-plan-button-active:hover {
   background: #45392f;
 }
+
+.plan-complete-banner {
+  margin-top: 16px;
+  border: 1px solid #8f7654;
+  border-radius: 16px;
+  background: #2d251f;
+  color: #f4efe7;
+  padding: 14px 16px;
+  font-weight: 700;
+}
