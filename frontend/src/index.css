@@ -419,3 +419,35 @@ p {
   padding: 14px 16px;
   line-height: 1.5;
 }
+
+.plan-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.start-plan-button:disabled,
+.clear-progress-button:disabled,
+.complete-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.start-plan-button:disabled:hover,
+.clear-progress-button:disabled:hover,
+.complete-button:disabled:hover {
+  background: transparent;
+}
+
+.plan-actions .start-plan-button,
+.plan-actions .clear-progress-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  margin-top: 0;
+  padding: 9px 14px;
+  line-height: 1;
+}

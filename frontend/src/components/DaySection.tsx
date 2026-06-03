@@ -5,12 +5,14 @@ import type { PlanDay } from "../types";
 type Props = {
   day: PlanDay;
   completedSteps: string[];
+  canTrackProgress: boolean;
   onToggleStepComplete: (stepKey: string) => void;
 };
 
 function DaySection({
   day,
   completedSteps,
+  canTrackProgress,
   onToggleStepComplete,
 }: Props) {
   const completedCount = day.steps.filter((step) =>
@@ -33,10 +35,11 @@ function DaySection({
 
       {day.steps.map((step) => (
         <StepRenderer
-          key={step.step_key}
-          step={step}
-          isComplete={completedSteps.includes(step.step_key)}
-          onToggleComplete={() => onToggleStepComplete(step.step_key)}
+        key={step.step_key}
+        step={step}
+        isComplete={completedSteps.includes(step.step_key)}
+        canTrackProgress={canTrackProgress}
+        onToggleComplete={() => onToggleStepComplete(step.step_key)}
         />
       ))}
     </section>

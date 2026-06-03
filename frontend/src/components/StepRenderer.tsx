@@ -5,10 +5,17 @@ import type { PlanStep } from "../types";
 type Props = {
   step: PlanStep;
   isComplete: boolean;
+  canTrackProgress: boolean;
   onToggleComplete: () => void;
 };
 
-function StepRenderer({ step, isComplete, onToggleComplete }: Props) {
+function StepRenderer({
+  step,
+  isComplete,
+  canTrackProgress,
+  onToggleComplete,
+}: Props) {
+
   return (
     <article className={isComplete ? "step step-complete" : "step"}>
       <div className="step-header">
@@ -17,6 +24,8 @@ function StepRenderer({ step, isComplete, onToggleComplete }: Props) {
         <button
           type="button"
           className={isComplete ? "complete-button complete-button-active" : "complete-button"}
+          disabled={!canTrackProgress}
+          title={!canTrackProgress ? "Sign in to track progress." : undefined}
           onClick={onToggleComplete}
         >
           <span className="checkmark">{isComplete ? "✓" : ""}</span>

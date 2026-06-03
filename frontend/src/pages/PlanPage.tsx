@@ -117,29 +117,59 @@ function PlanPage({ token, user }: Props) {
         </div>
       )}
 
+      <div className="plan-actions">
       <button
         type="button"
         className={
-            hasStartedPlan
+        hasStartedPlan
             ? "start-plan-button start-plan-button-active"
             : "start-plan-button"
         }
+        disabled={!user}
+        title={!user ? "Sign in to track active plans." : undefined}
         onClick={() => {
-            if (hasStartedPlan) {
+        if (!user) {
+            return;
+        }
+
+        if (hasStartedPlan) {
             deactivatePlan({ token, planSlug: slug })
-                .then(() => setHasStartedPlan(false))
-                .catch((error) => console.error(error));
+            .then(() => setHasStartedPlan(false))
+            .catch((error) => console.error(error));
 
             return;
-            }
+        }
 
-            startPlan({ token, planSlug: slug })
+        startPlan({ token, planSlug: slug })
             .then(() => setHasStartedPlan(true))
             .catch((error) => console.error(error));
         }}
-        >
+      >
         {hasStartedPlan ? "Active ✓" : "Set active"}
       </button>
+
+      <button
+        type="button"
+        className="clear-progress-button"
+        disabled={!user}
+        title={!user ? "Sign in to clear tracked progress." : undefined}
+        onClick={() => {
+        if (!user) {
+            return;
+        }
+
+        clearProgress({ token, planSlug: slug })
+            .then(() => {
+            setCompletedSteps([]);
+            setSelectedDayNumber(null);
+            setIsPlanComplete(false);
+            })
+            .catch((error) => console.error(error));
+        }}
+      >
+        Clear progress
+      </button>
+      </div>
 
       <DaySelector
         days={plan.days}
@@ -147,21 +177,6 @@ function PlanPage({ token, user }: Props) {
         completedSteps={completedSteps}
         onSelectDay={setSelectedDayNumber}
       />
-      <button
-        type="button"
-        className="clear-progress-button"
-        onClick={() => {
-            clearProgress({ token, planSlug: slug })
-                .then(() => {
-                    setCompletedSteps([]);
-                    setSelectedDayNumber(null);
-                    setIsPlanComplete(false);
-                })
-                .catch((error) => console.error(error));
-        }}
-        >
-        Clear progress
-      </button>
 
       {plan.days
         .filter((day) => day.day_number === selectedDayNumber)
@@ -170,6 +185,7 @@ function PlanPage({ token, user }: Props) {
             key={day.id}
             day={day}
             completedSteps={completedSteps}
+            canTrackProgress={!!user}
             onToggleStepComplete={toggleStepComplete}
             />
       ))}
