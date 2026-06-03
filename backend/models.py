@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -53,6 +53,10 @@ class PlanStep(Base):
 class UserPlanProgress(Base):
     __tablename__ = "user_plan_progress"
 
+    __table_args__ = (
+        UniqueConstraint("user_key", "plan_slug", name="uq_user_plan_progress"),
+    )
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
     # Temporary user key until real auth exists.
@@ -67,6 +71,15 @@ class UserPlanProgress(Base):
 class UserStepProgress(Base):
     __tablename__ = "user_step_progress"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "user_key",
+            "plan_slug",
+            "step_key",
+            name="uq_user_step_progress",
+        ),
+    )
+    
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
     # Temporary user key until real auth exists.
