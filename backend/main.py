@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers.plans import router as plans_router
+from routers.progress import router as progress_router
 
 app = FastAPI(title="Devotional App API")
 
@@ -14,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(plans_router)
+app.include_router(progress_router)
 
 
 @app.get("/")

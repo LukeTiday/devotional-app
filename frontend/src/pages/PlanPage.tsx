@@ -5,7 +5,13 @@ import DaySelector from "../components/DaySelector";
 import DayNavControls from "../components/DayNavControls";
 
 import { fetchPlanBySlug } from "../api/plans";
+import {
+  clearProgress,
+  fetchProgress,
+  updateStepProgress,
+} from "../api/progress";
 import type { Plan } from "../types";
+
 
 function PlanPage() {
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -22,32 +28,16 @@ function PlanPage() {
   }, [slug]);
 
   useEffect(() => {
-    if (!slug) {
-        return;
-    }
-
-    const savedSteps = localStorage.getItem(`completedSteps:${slug}`);
-
-    if (!savedSteps) {
-        setCompletedSteps([]);
+    fetchProgress(slug)
+        .then((data) => {
+        setCompletedSteps(data.completed_steps);
         setHasLoadedCompletedSteps(true);
-        return;
-    }
-
-    setCompletedSteps(JSON.parse(savedSteps));
-    setHasLoadedCompletedSteps(true);
+        })
+        .catch((error) => {
+        console.error(error);
+        setHasLoadedCompletedSteps(true);
+        });
   }, [slug]);
-
-  useEffect(() => {
-    if (!slug || !hasLoadedCompletedSteps) {
-        return;
-    }
-
-    localStorage.setItem(
-        `completedSteps:${slug}`,
-        JSON.stringify(completedSteps)
-    );
-  }, [slug, completedSteps, hasLoadedCompletedSteps]);
 
   useEffect(() => {
     if (!plan || selectedDayNumber !== null) {
@@ -62,11 +52,20 @@ function PlanPage() {
   }, [plan, selectedDayNumber, completedSteps]);
 
   function toggleStepComplete(stepKey: string) {
-    setCompletedSteps((current) =>
-        current.includes(stepKey)
+    setCompletedSteps((current) => {
+        const isCurrentlyComplete = current.includes(stepKey);
+        const nextIsComplete = !isCurrentlyComplete;
+
+        updateStepProgress({
+        planSlug: slug,
+        stepKey,
+        isComplete: nextIsComplete,
+        }).catch((error) => console.error(error));
+
+        return isCurrentlyComplete
         ? current.filter((key) => key !== stepKey)
-        : [...current, stepKey]
-    );
+        : [...current, stepKey];
+    });
   }
 
   if (!plan) {
@@ -87,12 +86,15 @@ function PlanPage() {
         type="button"
         className="clear-progress-button"
         onClick={() => {
-            setCompletedSteps([]);
-            setSelectedDayNumber(null);
-            localStorage.removeItem(`completedSteps:${slug}`);
+            clearProgress(slug)
+            .then(() => {
+                setCompletedSteps([]);
+                setSelectedDayNumber(null);
+            })
+            .catch((error) => console.error(error));
         }}
-      >
-        Clear local progress
+        >
+        Clear progress
       </button>
 
       {plan.days
