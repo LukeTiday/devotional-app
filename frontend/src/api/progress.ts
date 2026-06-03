@@ -1,12 +1,25 @@
-const DEV_USER_KEY = "dev-user";
+export async function fetchProgress({
+  token,
+  planSlug,
+}: {
+  token: string | null;
+  planSlug: string | undefined;
+}) {
+  if (!token) {
+    throw new Error("Missing auth token");
+  }
 
-export async function fetchProgress(planSlug: string | undefined) {
   if (!planSlug) {
     throw new Error("Missing plan slug");
   }
 
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/progress/${DEV_USER_KEY}/${planSlug}`
+    `${import.meta.env.VITE_API_URL}/progress/${planSlug}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 
   if (!response.ok) {
@@ -17,14 +30,20 @@ export async function fetchProgress(planSlug: string | undefined) {
 }
 
 export async function updateStepProgress({
+  token,
   planSlug,
   stepKey,
   isComplete,
 }: {
+  token: string | null;
   planSlug: string | undefined;
   stepKey: string;
   isComplete: boolean;
 }) {
+  if (!token) {
+    throw new Error("Missing auth token");
+  }
+
   if (!planSlug) {
     throw new Error("Missing plan slug");
   }
@@ -33,9 +52,9 @@ export async function updateStepProgress({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      user_key: DEV_USER_KEY,
       plan_slug: planSlug,
       step_key: stepKey,
       is_complete: isComplete,
@@ -49,15 +68,28 @@ export async function updateStepProgress({
   return response.json();
 }
 
-export async function clearProgress(planSlug: string | undefined) {
+export async function clearProgress({
+  token,
+  planSlug,
+}: {
+  token: string | null;
+  planSlug: string | undefined;
+}) {
+  if (!token) {
+    throw new Error("Missing auth token");
+  }
+
   if (!planSlug) {
     throw new Error("Missing plan slug");
   }
 
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/progress/${DEV_USER_KEY}/${planSlug}`,
+    `${import.meta.env.VITE_API_URL}/progress/${planSlug}`,
     {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -68,10 +100,16 @@ export async function clearProgress(planSlug: string | undefined) {
   return response.json();
 }
 
-export async function fetchActivePlans() {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/progress/active/${DEV_USER_KEY}`
-  );
+export async function fetchActivePlans(token: string | null) {
+  if (!token) {
+    return [];
+  }
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/progress/active`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch active plans");
@@ -80,7 +118,17 @@ export async function fetchActivePlans() {
   return response.json();
 }
 
-export async function startPlan(planSlug: string | undefined) {
+export async function startPlan({
+  token,
+  planSlug,
+}: {
+  token: string | null;
+  planSlug: string | undefined;
+}) {
+  if (!token) {
+    throw new Error("Missing auth token");
+  }
+
   if (!planSlug) {
     throw new Error("Missing plan slug");
   }
@@ -89,9 +137,9 @@ export async function startPlan(planSlug: string | undefined) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      user_key: DEV_USER_KEY,
       plan_slug: planSlug,
     }),
   });
@@ -103,7 +151,17 @@ export async function startPlan(planSlug: string | undefined) {
   return response.json();
 }
 
-export async function deactivatePlan(planSlug: string | undefined) {
+export async function deactivatePlan({
+  token,
+  planSlug,
+}: {
+  token: string | null;
+  planSlug: string | undefined;
+}) {
+  if (!token) {
+    throw new Error("Missing auth token");
+  }
+
   if (!planSlug) {
     throw new Error("Missing plan slug");
   }
@@ -114,9 +172,9 @@ export async function deactivatePlan(planSlug: string | undefined) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        user_key: DEV_USER_KEY,
         plan_slug: planSlug,
       }),
     }

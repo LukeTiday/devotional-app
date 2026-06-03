@@ -4,9 +4,14 @@ import PlanCard from "../components/PlanCard";
 import { fetchPlans } from "../api/plans";
 import type { ActivePlanSummary, PlanSummary } from "../types";
 import { fetchActivePlans } from "../api/progress";
+import type { AuthUser } from "../api/auth";
 
+type Props = {
+  token: string | null;
+  user: AuthUser | null;
+};
 
-function HomePage() {
+function HomePage({ token }: Props) {
   const [plans, setPlans] = useState<PlanSummary[]>([]);
   const [activePlans, setActivePlans] = useState<ActivePlanSummary[]>([]);
 
@@ -17,10 +22,10 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetchActivePlans()
+    fetchActivePlans(token)
         .then((data) => setActivePlans(data))
         .catch((error) => console.error(error));
-  }, []);
+  }, [token]);
 
   return (
     <main>

@@ -3,19 +3,18 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
-from models import Plan, UserPlanProgress, UserStepProgress
+from models import Plan, User, UserPlanProgress, UserStepProgress
+from auth import get_current_user
 
 router = APIRouter(prefix="/progress", tags=["progress"])
 
 
 class StepProgressUpdate(BaseModel):
-    user_key: str
     plan_slug: str
     step_key: str
     is_complete: bool
 
 class PlanProgressUpdate(BaseModel):
-    user_key: str
     plan_slug: str
 
 
@@ -77,8 +76,13 @@ def update_plan_completion_status(
 
     db.commit()
 
-@router.get("/active/{user_key}")
-def get_active_plans(user_key: str, db: Session = Depends(get_db)):
+@router.get("/active")
+def get_active_plans(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user_key = str(current_user.id)
+
     active_plan_slugs = (
         db.query(UserPlanProgress.plan_slug)
         .filter(
@@ -137,12 +141,14 @@ def get_active_plans(user_key: str, db: Session = Depends(get_db)):
 @router.post("/start")
 def start_plan(
     update: PlanProgressUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    user_key = str(current_user.id)
     progress = (
         db.query(UserPlanProgress)
         .filter(
-            UserPlanProgress.user_key == update.user_key,
+            UserPlanProgress.user_key == user_key,
             UserPlanProgress.plan_slug == update.plan_slug,
         )
         .first()
@@ -153,7 +159,7 @@ def start_plan(
         progress.is_complete = False
     else:
         progress = UserPlanProgress(
-            user_key=update.user_key,
+            user_key=user_key,
             plan_slug=update.plan_slug,
             is_active=True,
             is_complete=False,
@@ -167,12 +173,14 @@ def start_plan(
 @router.post("/deactivate")
 def deactivate_plan(
     update: PlanProgressUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    user_key = str(current_user.id)
     progress = (
         db.query(UserPlanProgress)
         .filter(
-            UserPlanProgress.user_key == update.user_key,
+            UserPlanProgress.user_key == user_key,
             UserPlanProgress.plan_slug == update.plan_slug,
         )
         .first()
@@ -184,15 +192,28 @@ def deactivate_plan(
 
     return {"status": "ok"}
 
-@router.get("/{user_key}/{plan_slug}")
-def get_progress(user_key: str, plan_slug: str, db: Session = Depends(get_db)):
+@router.get("/{plan_slug}")
+def get_progress(
+    plan_slug: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user_key = str(current_user.id)
+
+    update_plan_completion_status(
+        user_key=user_key,
+        plan_slug=plan_slug,
+        db=db,
+    )
+
     completed_steps = (
-        db.query(UserStepProgress)
+        db.query(UserStepProgress.step_key)
         .filter(
             UserStepProgress.user_key == user_key,
             UserStepProgress.plan_slug == plan_slug,
             UserStepProgress.is_complete == True,
         )
+        .distinct()
         .all()
     )
 
@@ -210,19 +231,21 @@ def get_progress(user_key: str, plan_slug: str, db: Session = Depends(get_db)):
         "plan_slug": plan_slug,
         "is_active": plan_progress.is_active if plan_progress else False,
         "is_complete": plan_progress.is_complete if plan_progress else False,
-        "completed_steps": [step.step_key for step in completed_steps],
+        "completed_steps": [step[0] for step in completed_steps],
     }
 
 
 @router.post("/step")
 def update_step_progress(
     update: StepProgressUpdate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    user_key = str(current_user.id)
     matching_progress_rows = (
         db.query(UserStepProgress)
         .filter(
-            UserStepProgress.user_key == update.user_key,
+            UserStepProgress.user_key == user_key,
             UserStepProgress.plan_slug == update.plan_slug,
             UserStepProgress.step_key == update.step_key,
         )
@@ -238,7 +261,7 @@ def update_step_progress(
             db.delete(duplicate_progress)
     else:
         progress = UserStepProgress(
-            user_key=update.user_key,
+            user_key=user_key,
             plan_slug=update.plan_slug,
             step_key=update.step_key,
             is_complete=update.is_complete,
@@ -248,15 +271,20 @@ def update_step_progress(
     db.commit()
 
     update_plan_completion_status(
-        user_key=update.user_key,
+        user_key=user_key,
         plan_slug=update.plan_slug,
         db=db,
     )
 
     return {"status": "ok"}
 
-@router.delete("/{user_key}/{plan_slug}")
-def clear_progress(user_key: str, plan_slug: str, db: Session = Depends(get_db)):
+@router.delete("/{plan_slug}")
+def clear_progress(
+    plan_slug: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user_key = str(current_user.id)
     db.query(UserStepProgress).filter(
         UserStepProgress.user_key == user_key,
         UserStepProgress.plan_slug == plan_slug,

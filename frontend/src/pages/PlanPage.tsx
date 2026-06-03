@@ -13,9 +13,15 @@ import {
   updateStepProgress,
 } from "../api/progress";
 import type { Plan } from "../types";
+import type { AuthUser } from "../api/auth";
+
+type Props = {
+  token: string | null;
+  user: AuthUser | null;
+};
 
 
-function PlanPage() {
+function PlanPage({ token, user }: Props) {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [hasLoadedCompletedSteps, setHasLoadedCompletedSteps] = useState(false);
@@ -31,7 +37,15 @@ function PlanPage() {
   }, [slug]);
 
   useEffect(() => {
-    fetchProgress(slug)
+    if (!token) {
+        setCompletedSteps([]);
+        setHasStartedPlan(false);
+        setIsPlanComplete(false);
+        setHasLoadedCompletedSteps(true);
+        return;
+    }
+
+    fetchProgress({ token, planSlug: slug })
         .then((data) => {
         setCompletedSteps(data.completed_steps);
         setHasStartedPlan(data.is_active);
@@ -42,7 +56,7 @@ function PlanPage() {
         console.error(error);
         setHasLoadedCompletedSteps(true);
         });
-  }, [slug]);
+  }, [token, slug]);
 
   useEffect(() => {
     if (!plan || selectedDayNumber !== null) {
@@ -66,11 +80,12 @@ function PlanPage() {
         : [...current, stepKey];
 
         updateStepProgress({
+        token,
         planSlug: slug,
         stepKey,
         isComplete: nextIsComplete,
         })
-        .then(() => fetchProgress(slug))
+        .then(() => fetchProgress({ token, planSlug: slug }))
         .then((data) => {
             setHasStartedPlan(data.is_active);
             setIsPlanComplete(data.is_complete);
@@ -105,14 +120,14 @@ function PlanPage() {
         }
         onClick={() => {
             if (hasStartedPlan) {
-            deactivatePlan(slug)
+            deactivatePlan({ token, planSlug: slug })
                 .then(() => setHasStartedPlan(false))
                 .catch((error) => console.error(error));
 
             return;
             }
 
-            startPlan(slug)
+            startPlan({ token, planSlug: slug })
             .then(() => setHasStartedPlan(true))
             .catch((error) => console.error(error));
         }}
@@ -130,7 +145,7 @@ function PlanPage() {
         type="button"
         className="clear-progress-button"
         onClick={() => {
-            clearProgress(slug)
+            clearProgress({ token, planSlug: slug })
                 .then(() => {
                     setCompletedSteps([]);
                     setSelectedDayNumber(null);

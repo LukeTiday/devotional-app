@@ -39,8 +39,8 @@ function App() {
   return (
     <Routes>
       <Route element={<Layout user={user} onLogout={handleLogout} />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/plans/:slug" element={<PlanPage />} />
+        <Route path="/" element={<HomePage token={token} user={user} />} />
+        <Route path="/plans/:slug" element={<PlanPage token={token} user={user} />} />
         <Route path="/auth" element={<AuthPage onAuthSuccess={setToken} />} />
       </Route>
     </Routes>
