@@ -7,7 +7,9 @@ import DayNavControls from "../components/DayNavControls";
 import { fetchPlanBySlug } from "../api/plans";
 import {
   clearProgress,
+  deactivatePlan,
   fetchProgress,
+  startPlan,
   updateStepProgress,
 } from "../api/progress";
 import type { Plan } from "../types";
@@ -18,7 +20,7 @@ function PlanPage() {
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [hasLoadedCompletedSteps, setHasLoadedCompletedSteps] = useState(false);
   const [selectedDayNumber, setSelectedDayNumber] = useState<number | null>(null);
-
+  const [hasStartedPlan, setHasStartedPlan] = useState(false);
   const { slug } = useParams();
 
   useEffect(() => {
@@ -31,6 +33,7 @@ function PlanPage() {
     fetchProgress(slug)
         .then((data) => {
         setCompletedSteps(data.completed_steps);
+        setHasStartedPlan(data.is_active);
         setHasLoadedCompletedSteps(true);
         })
         .catch((error) => {
@@ -76,6 +79,29 @@ function PlanPage() {
     <main>
       <h1>{plan.title}</h1>
       <p>{plan.description}</p>
+      <button
+        type="button"
+        className={
+            hasStartedPlan
+            ? "start-plan-button start-plan-button-active"
+            : "start-plan-button"
+        }
+        onClick={() => {
+            if (hasStartedPlan) {
+            deactivatePlan(slug)
+                .then(() => setHasStartedPlan(false))
+                .catch((error) => console.error(error));
+
+            return;
+            }
+
+            startPlan(slug)
+            .then(() => setHasStartedPlan(true))
+            .catch((error) => console.error(error));
+        }}
+        >
+        {hasStartedPlan ? "Active ✓" : "Set active"}
+      </button>
       <DaySelector
         days={plan.days}
         selectedDayNumber={selectedDayNumber}

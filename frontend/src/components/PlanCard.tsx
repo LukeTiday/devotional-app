@@ -12,7 +12,9 @@ function PlanCard({ plan }: Props) {
       <h3>{plan.title}</h3>
       <p>{plan.description}</p>
 
-      <Link to={`/plans/${plan.slug}`}>Open plan</Link>
+      <Link className="plan-card-link" to={`/plans/${plan.slug}`}>
+        Open plan
+      </Link>
     </article>
   );
 }
