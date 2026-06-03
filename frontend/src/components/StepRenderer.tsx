@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 
 import type { PlanStep } from "../types";
+import ScriptureBlock from "./ScriptureBlock";
 
 type Props = {
   step: PlanStep;
@@ -38,9 +39,7 @@ function StepRenderer({
       )}
 
       {step.scripture_reference && (
-        <p>
-          <strong>Scripture:</strong> {step.scripture_reference}
-        </p>
+        <ScriptureBlock reference={step.scripture_reference} />
       )}
     </article>
   );

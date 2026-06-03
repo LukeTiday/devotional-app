@@ -451,3 +451,45 @@ p {
   padding: 9px 14px;
   line-height: 1;
 }
+.scripture-block {
+  margin-top: 12px;
+  border-left: 3px solid #8f7654;
+  padding-left: 16px;
+}
+
+.scripture-block > strong {
+  display: block;
+  margin-bottom: 12px;
+  color: #c6a875;
+}
+
+.scripture-content {
+  line-height: 1.75;
+}
+
+.scripture-content .yv-h {
+  margin: 0 0 12px;
+  color: #c6a875;
+  font-weight: 700;
+}
+
+.scripture-content .p {
+  display: inline;
+}
+
+.scripture-content > div {
+  display: inline;
+}
+
+.scripture-content .yv-vlbl {
+  margin-right: 4px;
+  color: #8f7654;
+  font-size: 0.68em;
+  vertical-align: super;
+  position: relative;
+  top: -0.15em;
+}
+
+.scripture-content .wj {
+  color: inherit;
+}
