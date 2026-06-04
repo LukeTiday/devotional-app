@@ -12,7 +12,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "devotional-app-frontend-production.up.railway.app",
+        "https://devotional-app-frontend-production.up.railway.app",
     ]
     allow_credentials=True,
     allow_methods=["*"],
