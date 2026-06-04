@@ -24,7 +24,6 @@ type Props = {
 function PlanPage({ token, user }: Props) {
   const [plan, setPlan] = useState<Plan | null>(null);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [hasLoadedCompletedSteps, setHasLoadedCompletedSteps] = useState(false);
   const [selectedDayNumber, setSelectedDayNumber] = useState<number | null>(null);
   const [hasStartedPlan, setHasStartedPlan] = useState(false);
   const [isPlanComplete, setIsPlanComplete] = useState(false);
@@ -41,7 +40,6 @@ function PlanPage({ token, user }: Props) {
         setCompletedSteps([]);
         setHasStartedPlan(false);
         setIsPlanComplete(false);
-        setHasLoadedCompletedSteps(true);
         return;
     }
 
@@ -50,11 +48,9 @@ function PlanPage({ token, user }: Props) {
         setCompletedSteps(data.completed_steps);
         setHasStartedPlan(data.is_active);
         setIsPlanComplete(data.is_complete);
-        setHasLoadedCompletedSteps(true);
         })
         .catch((error) => {
         console.error(error);
-        setHasLoadedCompletedSteps(true);
         });
   }, [token, slug]);
 
