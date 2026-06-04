@@ -4,7 +4,23 @@ import re
 from database import SessionLocal
 from models import Plan, PlanDay, PlanStep
 
-PLANS_DIR = "../plans"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+POSSIBLE_PLANS_DIRS = [
+    os.path.join(BASE_DIR, "plans"),
+    os.path.abspath(os.path.join(BASE_DIR, "..", "plans")),
+]
+
+
+def get_plans_dir():
+    for plans_dir in POSSIBLE_PLANS_DIRS:
+        if os.path.isdir(plans_dir):
+            return plans_dir
+
+    raise FileNotFoundError(
+        "Could not find plans directory. Checked: "
+        + ", ".join(POSSIBLE_PLANS_DIRS)
+    )
 
 
 def parse_frontmatter(text: str):
@@ -140,6 +156,8 @@ def import_plan(filepath: str):
 
 
 if __name__ == "__main__":
-    for filename in os.listdir(PLANS_DIR):
+    plans_dir = get_plans_dir()
+
+    for filename in os.listdir(plans_dir):
         if filename.endswith(".md"):
-            import_plan(os.path.join(PLANS_DIR, filename))
+            import_plan(os.path.join(plans_dir, filename))
