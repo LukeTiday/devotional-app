@@ -273,21 +273,54 @@ BOOK_TO_USFM = {
 }
 
 def parse_reference(reference: str):
-    match = re.match(
-        r"^([1-3]?\s?[A-Za-z]+)\s+(\d+):(\d+)(?:-(\d+))?$",
-        reference.strip(),
+    cleaned_reference = reference.strip()
+
+    # Supports:
+    # John 15
+    # Psalm 23
+    chapter_match = re.match(
+        r"^([1-3]?\s?[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+)$",
+        cleaned_reference,
     )
 
-    if not match:
+    if chapter_match:
+        book_name = " ".join(chapter_match.group(1).lower().split())
+        chapter = int(chapter_match.group(2))
+
+        book_code = BOOK_TO_USFM.get(book_name)
+
+        if not book_code:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported book name: {book_name}",
+            )
+
+        return {
+            "type": "chapter",
+            "book_code": book_code,
+            "chapter": chapter,
+            "start_verse": None,
+            "end_verse": None,
+        }
+
+    # Supports:
+    # John 15:1
+    # John 15:1-11
+    verse_match = re.match(
+        r"^([1-3]?\s?[A-Za-z]+(?:\s+[A-Za-z]+)*)\s+(\d+):(\d+)(?:-(\d+))?$",
+        cleaned_reference,
+    )
+
+    if not verse_match:
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported scripture reference format: {reference}",
         )
 
-    book_name = " ".join(match.group(1).lower().split())
-    chapter = int(match.group(2))
-    start_verse = int(match.group(3))
-    end_verse = int(match.group(4) or start_verse)
+    book_name = " ".join(verse_match.group(1).lower().split())
+    chapter = int(verse_match.group(2))
+    start_verse = int(verse_match.group(3))
+    end_verse = int(verse_match.group(4) or start_verse)
 
     book_code = BOOK_TO_USFM.get(book_name)
 
@@ -304,6 +337,7 @@ def parse_reference(reference: str):
         )
 
     return {
+        "type": "verse_range",
         "book_code": book_code,
         "chapter": chapter,
         "start_verse": start_verse,
@@ -383,15 +417,45 @@ def get_reference(reference: str, bible_id: Optional[int] = None):
 
     parsed = parse_reference(reference)
 
+    if parsed["type"] == "chapter":
+        passage_id = f"{parsed['book_code']}.{parsed['chapter']}"
+
+        response = requests.get(
+            f"{YOUVERSION_API_BASE_URL}/bibles/{selected_bible_id}/passages/{passage_id}",
+            headers={
+                "X-YVP-App-Key": YOUVERSION_APP_KEY,
+                "Accept": "application/json",
+            },
+            params={
+                "format": "html",
+                "include_headings": "true",
+                "include_notes": "false",
+            },
+            timeout=10,
+        )
+
+        if not response.ok:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=response.text,
+            )
+
+        passage_data = response.json()
+
+        return {
+            "reference": passage_data.get("reference", reference),
+            "bible_id": selected_bible_id,
+            "verses": [],
+            "content": passage_data.get("content", ""),
+        }
+
     verses = []
 
     for verse_number in range(
         parsed["start_verse"],
         parsed["end_verse"] + 1,
     ):
-        passage_id = (
-            f"{parsed['book_code']}.{parsed['chapter']}.{verse_number}"
-        )
+        passage_id = f"{parsed['book_code']}.{parsed['chapter']}.{verse_number}"
 
         response = requests.get(
             f"{YOUVERSION_API_BASE_URL}/bibles/{selected_bible_id}/passages/{passage_id}",
