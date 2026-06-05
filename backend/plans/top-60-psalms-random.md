@@ -8,7 +8,7 @@ image_url:
 # Day 1: Psalm 1
 
 ::scripture
-Psalm 1
+Psalms 1
 ::
 
 # Day 2: Psalm 10
