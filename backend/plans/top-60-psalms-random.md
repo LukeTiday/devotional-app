@@ -1,6 +1,6 @@
 ---
-title: Top 60 Psalms
-slug: top-60-psalms
+title: 60 days in the Psalms
+slug: 60-days-in-the-psalms
 description: A 60-day reading plan through highly referenced Psalms.
 image_url:
 ---
