@@ -2,7 +2,7 @@ import os
 import re
 
 from database import SessionLocal
-from models import Plan, PlanDay, PlanStep
+from models import Plan, PlanDay, PlanStep, UserPlanProgress, UserStepProgress
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -154,9 +154,46 @@ def import_plan(filepath: str):
 
     print(f"Imported: {metadata['title']}")
 
+def remove_deleted_plans(plans_dir: str):
+    db = SessionLocal()
+
+    markdown_slugs = set()
+
+    for filename in os.listdir(plans_dir):
+        if not filename.endswith(".md"):
+            continue
+
+        filepath = os.path.join(plans_dir, filename)
+
+        with open(filepath, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        metadata, _ = parse_frontmatter(text)
+        markdown_slugs.add(metadata["slug"])
+
+    database_plans = db.query(Plan).all()
+
+    for plan in database_plans:
+        if plan.slug not in markdown_slugs:
+            print(f"Removing deleted plan: {plan.title}")
+
+            db.query(UserStepProgress).filter(
+                UserStepProgress.plan_slug == plan.slug
+            ).delete()
+
+            db.query(UserPlanProgress).filter(
+                UserPlanProgress.plan_slug == plan.slug
+            ).delete()
+
+            db.delete(plan)
+
+    db.commit()
+    db.close()
 
 if __name__ == "__main__":
     plans_dir = get_plans_dir()
+
+    remove_deleted_plans(plans_dir)
 
     for filename in os.listdir(plans_dir):
         if filename.endswith(".md"):
