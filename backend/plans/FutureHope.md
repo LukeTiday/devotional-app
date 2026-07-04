@@ -1,3 +1,4 @@
+---
 title: The Prophets' Future Hope
 slug: prophets-hope
 description: a collection of passages that explore the future hopes of the major and minor prophets
